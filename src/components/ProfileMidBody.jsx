@@ -39,7 +39,7 @@ export default function ProfileMidBody() {
     // }, [dispatch]);
 
     useEffect(() => {
-        dispatch(fetchPostsByUser(currentUser.uid));
+        dispatch(fetchPostsByUser(currentUser?.uid));
     }, [dispatch, currentUser])
 
     return (
