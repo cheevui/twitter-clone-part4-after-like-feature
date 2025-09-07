@@ -1,45 +1,93 @@
-import axios from "axios";
-import { useEffect, useState } from "react";
+// //v2 and redux
+// import axios from "axios";
+import { useContext, useEffect, useState } from "react";
 import { Button, Col, Form, Image, Modal, Row } from "react-bootstrap";
 import { useNavigate } from "react-router-dom";
-import useLocalStorage from "use-local-storage";
+// //v2 and redux
+// import useLocalStorage from "use-local-storage";
+import {
+    GoogleAuthProvider,
+    createUserWithEmailAndPassword,
+    getAuth,
+    signInWithEmailAndPassword,
+    signInWithPopup,
+} from "firebase/auth";
+import { AuthContext } from "../components/AuthProvider";
 
 export default function AuthPage() {
     const loginImage = "https://sig1.co/img-twitter-1";
-    const url =
-        "https://3779aa9b-2446-4cca-b828-03b01396caad-00-19xgol6yx3357.pike.replit.dev";
+    // // v2 firebase
+    // const url = "https://3779aa9b-2446-4cca-b828-03b01396caad-00-19xgol6yx3357.pike.replit.dev";
+    // const [authToken, setAuthToken] = useLocalStorage("authToken", "");
     // values: null (no modal show), "login", "signup"
     const [modalShow, setModalShow] = useState(null);
     const handleShowSignUp = () => setModalShow("signup");
     const handleShowLogin = () => setModalShow("login");
     const [username, setUsername] = useState("");
     const [password, setPassword] = useState("");
-    const [authToken, setAuthToken] = useLocalStorage("authToken", "");
     const navigate = useNavigate();
+    const auth = getAuth();
+    const { currentUser } = useContext(AuthContext);
+    const provider = new GoogleAuthProvider();
 
     useEffect(() => {
-        if (authToken) navigate("/profile");
-    }, [authToken, navigate]);
+        if (currentUser) navigate("/profile");
+    }, [currentUser, navigate]);
 
+    // // v2 
+    // const handleSignUp = async (e) => {
+    //     e.preventDefault();
+    //     try {
+    //         const res = await axios.post(`${url}/signup`, { username, password });
+    //         console.log(res.data);
+    //     } catch (error) {
+    //         console.error(error);
+    //     }
+    // };
+
+    //Firebase Signup
     const handleSignUp = async (e) => {
         e.preventDefault();
         try {
-            const res = await axios.post(`${url}/signup`, { username, password });
-            console.log(res.data);
+            const res = await createUserWithEmailAndPassword(
+                auth,
+                username,
+                password
+            );
+            console.log(res.user);
         } catch (error) {
             console.error(error);
         }
     };
+
+    //   //v2
+    //     const handleLogin = async (e) => {
+    //         e.preventDefault();
+    //         try {
+    //             const res = await axios.post(`${url}/login`, { username, password });
+    //             // res.data is not empty and auth is true, and token is not empty
+    //             if (res.data && res.data.auth === true && res.data.token) {
+    //                 setAuthToken(res.data.token);
+    //                 console.log("login was succesful, token saved");
+    //             }
+    //             console.log(res.data);
+    //         } catch (error) {
+    //             console.error(error);
+    //         }
+    //     };
+
     const handleLogin = async (e) => {
         e.preventDefault();
         try {
-            const res = await axios.post(`${url}/login`, { username, password });
-            // res.data is not empty and auth is true, and token is not empty
-            if (res.data && res.data.auth === true && res.data.token) {
-                setAuthToken(res.data.token);
-                console.log("login was succesful, token saved");
-            }
-            console.log(res.data);
+            await signInWithEmailAndPassword(auth, username, password);
+        } catch (error) {
+            console.error(error);
+        }
+    };
+    const handleGoogleLogin = async (e) => {
+        e.preventDefault();
+        try {
+            await signInWithPopup(auth, provider);
         } catch (error) {
             console.error(error);
         }
@@ -65,7 +113,11 @@ export default function AuthPage() {
                     Join Twitter today.
                 </h2>
                 <Col sm={5} className="d-grid gap-2">
-                    <Button className="rounded-pill" variant="outline-dark">
+                    <Button
+                        className="rounded-pill"
+                        variant="outline-dark"
+                        onClick={handleGoogleLogin}
+                    >
                         <i className="bi bi-google"></i> Sign up with Google
                     </Button>
                     <Button className="rounded-pill" variant="outline-dark">

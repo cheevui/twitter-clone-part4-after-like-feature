@@ -1,7 +1,10 @@
-import { jwtDecode } from "jwt-decode";
-import { useEffect } from "react";
-import { Button, Col, Image, Nav, Row, Spinner } from "react-bootstrap";
+// //v2 and redux
+// import { jwtDecode } from "jwt-decode";
+// import { fetchPostsByUser } from "../features/posts/postsSlice";
 import { useDispatch, useSelector } from "react-redux";
+import { useContext, useEffect } from "react";
+import { AuthContext } from "./AuthProvider";
+import { Button, Col, Image, Nav, Row, Spinner } from "react-bootstrap";
 import ProfilePostCard from "./ProfilePostCard";
 import { fetchPostsByUser } from "../features/posts/postsSlice";
 
@@ -11,9 +14,11 @@ export default function ProfileMidBody() {
     const url = "https://pbs.twimg.com/profile_banners/83072625/1602845571/1500x500";
     const pic = "https://pbs.twimg.com/profile_images/1587405892437221376/h167Jlb2_400x400.jpg";
 
+    // // v2 redux
     const dispatch = useDispatch();
     const posts = useSelector((state) => state.posts.posts);
     const loading = useSelector((state) => state.posts.loading);
+    const { currentUser } = useContext(AuthContext);
 
     // // Fetch posts based on user id (v2)
     // const fetchPosts = (userId) => {
@@ -23,15 +28,19 @@ export default function ProfileMidBody() {
     //         .catch((error) => console.error("Error:", error));
     // }
 
-    useEffect(() => {
-        const token = localStorage.getItem("authToken");
-        if (token) {
-            const decodedToken = jwtDecode(token);
-            const userId = decodedToken.id;
-            dispatch(fetchPostsByUser(userId));
-        }
-    }, [dispatch]);
+    // //v2 firebase dont need this
+    // useEffect(() => {
+    //     const token = localStorage.getItem("authToken");
+    //     if (token) {
+    //         const decodedToken = jwtDecode(token);
+    //         const userId = decodedToken.id;
+    //         dispatch(fetchPostsByUser(userId));
+    //     }
+    // }, [dispatch]);
 
+    useEffect(() => {
+        dispatch(fetchPostsByUser(currentUser.uid));
+    }, [dispatch, currentUser])
 
     return (
         <Col sm={6} className="bg-light" style={{ border: "1px solid lightgrey" }}>
@@ -95,8 +104,11 @@ export default function ProfileMidBody() {
             {posts.map((post) => (
                 <ProfilePostCard
                     key={post.id}
-                    content={post.content}
-                    postId={post.id}
+                    // //v2 redux
+                    // content={post.content}
+                    // postId={post.id}
+                    //v2 firebase firestore
+                    post={post}
                 />
             ))}
         </Col>
